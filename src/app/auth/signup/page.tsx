@@ -25,32 +25,40 @@ export default function SignupPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        name,
-        email,
-        department: "",
-        year: "",
-        communicationLevel: "",
-        careerInterest: "",
-        totalScore: 0,
-        badges: [],
-        completedDays: [],
-        streak: 0,
-        monthlyGoal: 80,
-        role: "student",
-        createdAt: new Date().toISOString()
-      });
+      // Safety Timeout: If redirection takes more than 5 seconds, force it.
+      const redirectTimeout = setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 5000);
 
-      // Use a hard redirect for the first entry to ensure the dashboard loads fresh data
-      window.location.href = "/dashboard";
+      try {
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          name,
+          email,
+          department: "",
+          year: "",
+          communicationLevel: "",
+          careerInterest: "",
+          totalScore: 0,
+          badges: [],
+          completedDays: [],
+          streak: 0,
+          monthlyGoal: 80,
+          role: "student",
+          createdAt: new Date().toISOString()
+        });
+        
+        clearTimeout(redirectTimeout);
+        window.location.href = "/dashboard";
+      } catch (firestoreErr) {
+        console.error("Firestore error (background):", firestoreErr);
+        // Even if Firestore fails, the Auth succeeded, so we move forward
+        window.location.href = "/dashboard";
+      }
     } catch (err: any) {
-      console.error("Signup error:", err);
-      // Firebase specific error messages for better UX
+      console.error("Signup account error:", err);
       if (err.code === 'auth/email-already-in-use') {
         setError("This email is already registered. Please log in.");
-      } else if (err.code === 'auth/operation-not-allowed') {
-        setError("Email/Password signup is not enabled in Firebase Console.");
       } else {
         setError(err.message || "Failed to create account");
       }
