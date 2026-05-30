@@ -1,15 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0f172a;
+  --color-secondary: #2563eb;
+  --color-accent: #22d3ee;
+  --color-background-soft: #eff6ff;
+  --color-background-gray: #f3f4f6;
+}
 
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
-  --primary: #0f172a;
-  --secondary: #2563eb;
-  --accent: #22d3ee;
-  --background-soft: #eff6ff;
-  --background-gray: #f3f4f6;
 }
 
 @media (prefers-color-scheme: dark) {
