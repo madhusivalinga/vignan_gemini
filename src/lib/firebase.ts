@@ -12,7 +12,18 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app;
+if (!getApps().length) {
+  if (!firebaseConfig.apiKey) {
+    console.error("Firebase API Key is missing! Check your environment variables.");
+    // Initialize with dummy data to prevent crash during build/SSR
+    app = initializeApp({ ...firebaseConfig, apiKey: "dummy-key" });
+  } else {
+    app = initializeApp(firebaseConfig);
+  }
+} else {
+  app = getApp();
+}
 
 const auth = getAuth(app);
 // Use memory-only cache and log polling to bypass network/permission blocks
