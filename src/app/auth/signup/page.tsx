@@ -42,8 +42,8 @@ export default function SignupPage() {
         createdAt: new Date().toISOString()
       });
 
-      // Redirect to dashboard as a more stable entry point
-      router.push("/dashboard");
+      // Use a hard redirect for the first entry to ensure the dashboard loads fresh data
+      window.location.href = "/dashboard";
     } catch (err: any) {
       console.error("Signup error:", err);
       // Firebase specific error messages for better UX
@@ -84,9 +84,9 @@ export default function SignupPage() {
           role: "student",
           createdAt: new Date().toISOString()
         });
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       setError(err.message || "Failed to sign up with Google");
