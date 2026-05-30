@@ -1,16 +1,15 @@
-@import "tailwindcss";
-
-@theme {
-  --color-primary: #0f172a; /* Navy Blue */
-  --color-secondary: #2563eb; /* Royal Blue */
-  --color-accent: #22d3ee; /* Soft Cyan */
-  --color-background-soft: #eff6ff; /* Soft Blue */
-  --color-background-gray: #f3f4f6; /* Light Gray */
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
   --foreground: #0f172a;
+  --primary: #0f172a;
+  --secondary: #2563eb;
+  --accent: #22d3ee;
+  --background-soft: #eff6ff;
+  --background-gray: #f3f4f6;
 }
 
 @media (prefers-color-scheme: dark) {
