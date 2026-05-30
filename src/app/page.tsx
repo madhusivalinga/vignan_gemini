@@ -27,10 +27,10 @@ export default function LandingPage() {
               <span>Get Started</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <button className="flex items-center space-x-2 bg-white text-secondary border border-secondary px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all shadow-sm">
+            <Link href="/demo" className="flex items-center space-x-2 bg-white text-secondary border border-secondary px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all shadow-sm">
               <Video className="w-5 h-5" />
               <span>Watch Demo</span>
-            </button>
+            </Link>
           </div>
         </section>
 
