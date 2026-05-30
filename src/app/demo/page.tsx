@@ -1,5 +1,6 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, 
@@ -13,249 +14,395 @@ import {
   Sparkles,
   Mic,
   BrainCircuit,
-  Award
+  Award,
+  Pause,
+  RotateCcw,
+  LayoutDashboard,
+  Target,
+  Trophy,
+  Flame,
+  CheckCircle2,
+  Info
 } from 'lucide-react';
 
-export default function DemoPage() {
-  const [activeStep, setActiveStep] = useState(0);
+// Scenes configuration
+const SCENES = [
+  {
+    id: 'intro',
+    title: 'The Communication Gap',
+    description: 'Why do 75% of graduates struggle in interviews? It is not technical skill - it is communication.',
+    duration: 5000
+  },
+  {
+    id: 'dashboard',
+    title: 'Your Command Center',
+    description: 'The VoxVignan Dashboard tracks your streak, score, and your specialized 7-day roadmap.',
+    duration: 6000
+  },
+  {
+    id: 'challenge',
+    title: 'Interactive Challenges',
+    description: 'From Elevator Pitches to Technical Assessments, practice in a safe AI-driven environment.',
+    duration: 5000
+  },
+  {
+    id: 'feedback',
+    title: 'Instant AI Evaluation',
+    description: 'Get real-time feedback on your tone, sentiment, grammar, and even filler words using Google Gemini.',
+    duration: 6000
+  },
+  {
+    id: 'success',
+    title: 'Data-Driven Growth',
+    description: 'Watch your scores rise and earn professional badges as you master the art of communication.',
+    duration: 5000
+  }
+];
 
-  // Auto-advance some steps for a "video-like" feel if needed, 
-  // or let user scroll/click.
+export default function VideoDemoPage() {
+  const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
+  const currentScene = SCENES[currentSceneIndex];
+
+  // Progress and Auto-advance logic
+  useEffect(() => {
+    if (isPlaying) {
+      const stepTime = 50; // ms
+      const increment = (stepTime / currentScene.duration) * 100;
+      
+      timerRef.current = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            handleNext();
+            return 0;
+          }
+          return prev + increment;
+        });
+      }, stepTime);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPlaying, currentSceneIndex]);
+
+  const handleNext = () => {
+    setProgress(0);
+    setCurrentSceneIndex(prev => (prev + 1) % SCENES.length);
+  };
+
+  const handlePrev = () => {
+    setProgress(0);
+    setCurrentSceneIndex(prev => (prev - 1 + SCENES.length) % SCENES.length);
+  };
+
+  const jumpToScene = (index: number) => {
+    setProgress(0);
+    setCurrentSceneIndex(index);
+    setIsPlaying(true);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-200">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4 flex justify-between items-center">
+    <div className="min-h-screen bg-[#0a0f1d] text-white font-sans overflow-hidden">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full"></div>
+      </div>
+
+      {/* Top Navbar */}
+      <nav className="fixed top-0 w-full z-50 bg-[#0a0f1d]/50 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2 group">
-          <ArrowLeft className="w-5 h-5 text-slate-500 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-bold text-xl tracking-tight text-primary">VoxVignan <span className="text-secondary">Demo</span></span>
+          <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:-translate-x-1 transition-transform" />
+          <span className="font-bold text-xl tracking-tight">VoxVignan <span className="text-secondary text-blue-500">AI Tour</span></span>
         </Link>
-        <Link href="/auth/signup" className="bg-secondary text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-200 transition-all active:scale-95">
-          Join the Platform
-        </Link>
+        <div className="flex items-center space-x-4">
+            <div className="hidden md:flex bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-xs font-semibold text-slate-400">
+               <Info className="w-3.5 h-3.5 mr-2" />
+               New User Interactive Guide
+            </div>
+            <Link href="/auth/signup" className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+              Get Started
+            </Link>
+        </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="pt-24 pb-20">
+      {/* Video Container Area */}
+      <main className="relative pt-24 pb-32 h-screen flex flex-col items-center justify-center px-4 max-w-7xl mx-auto">
         
-        {/* Section 1: The Challenge */}
-        <section className="max-w-6xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8 animate-in fade-in slide-in-from-left duration-1000">
-              <div className="inline-flex items-center space-x-2 bg-red-100 text-red-600 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wider">
-                <Sparkles className="w-4 h-4" />
-                <span>The Challenge</span>
-              </div>
-              <h1 className="text-5xl md:text-6xl font-extrabold text-primary leading-tight">
-                Communication: The <span className="text-red-500 underline decoration-wavy underline-offset-8">Difference</span> Between a Job & a Career.
-              </h1>
-              <p className="text-xl text-slate-600 leading-relaxed">
-                Many brilliant students fail to land their dream jobs not because of technical skills, but because they can't articulate their ideas.
-              </p>
-              <div className="space-y-4">
-                <ChallengeItem 
-                  title="Anxiety & Fear" 
-                  description="75% of people experience 'Glossophobia' - the fear of public speaking."
-                />
-                <ChallengeItem 
-                  title="Lack of Feedback" 
-                  description="Without a mentor, you keep repeating the same communication mistakes."
-                />
-                <ChallengeItem 
-                  title="Filler Words" 
-                  description="'Um', 'Uh', 'Like' - Small habits that destroy professional credibility."
-                />
-              </div>
+        {/* Main Viewport */}
+        <div className="w-full max-w-5xl aspect-video bg-[#141b2d] rounded-3xl border border-white/10 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden relative group">
+           
+            {/* PROGRESS BAR */}
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5 z-20">
+                <div 
+                  className="h-full bg-blue-500 transition-all duration-75 ease-linear shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
+                  style={{ width: `${progress}%` }}
+                ></div>
             </div>
-            
-            <div className="relative animate-in zoom-in duration-1000">
-              <div className="absolute -inset-4 bg-gradient-to-tr from-red-200 to-blue-200 rounded-3xl blur-2xl opacity-30 shadow-2xl"></div>
-              <div className="relative bg-white p-8 rounded-3xl border border-slate-100 shadow-2xl overflow-hidden aspect-square flex flex-col justify-center items-center text-center">
-                 <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                    <Mic className="w-12 h-12 text-red-400" />
-                 </div>
-                 <h3 className="text-2xl font-bold mb-2">Stage Fright</h3>
-                 <p className="text-slate-500">How do you practice when you're too nervous to try?</p>
-                 
-                 {/* Decorative UI elements */}
-                 <div className="absolute bottom-10 left-10 right-10 flex flex-col space-y-2">
-                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-red-400 w-3/4 rounded-full"></div>
-                    </div>
-                    <div className="flex justify-between text-xs font-bold text-slate-400">
-                      <span>CONFIDENCE</span>
-                      <span>25%</span>
-                    </div>
-                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Section 2: The Solution (Success starts here) */}
-        <section className="bg-primary text-white py-24 my-20">
-          <div className="max-w-6xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wider mb-8">
-              <Zap className="w-4 h-4" />
-              <span>The Success Story</span>
+            {/* SCENE CONTENT RENDERING */}
+            <div className="absolute inset-0 flex items-center justify-center p-6 md:p-12">
+               {currentSceneIndex === 0 && <IntroScene />}
+               {currentSceneIndex === 1 && <DashboardScene />}
+               {currentSceneIndex === 2 && <ChallengeSelectionScene />}
+               {currentSceneIndex === 3 && <AIEvaluationScene />}
+               {currentSceneIndex === 4 && <SuccessScene />}
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-16">How VoxVignan AI Builds <span className="text-blue-400">Communication Mastery</span></h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <SuccessStep 
-                number="01"
-                icon={<BrainCircuit className="w-10 h-10" />}
-                title="AI Analysis"
-                description="Google Gemini analyzes your tone, content, and sentiment in real-time."
-              />
-              <SuccessStep 
-                number="02"
-                icon={<MessageSquare className="w-10 h-10" />}
-                title="Safe Space"
-                description="Practice with an AI that never judges, only guides you to excellence."
-              />
-              <SuccessStep 
-                number="03"
-                icon={<TrendingUp className="w-10 h-10" />}
-                title="Data-Driven Success"
-                description="Visual progress tracking proves your growth with every session."
-              />
-            </div>
-          </div>
-        </section>
 
-        {/* Section 3: Product Walkthrough (Animated Mockup) */}
-        <section className="max-w-6xl mx-auto px-6 py-20">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold text-primary mb-6">Experience the AI Mentor</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">See how VoxVignan turns every challenge into a stepping stone for success.</p>
-          </div>
+            {/* OVERLAY NARRATION */}
+            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black to-transparent p-8 pt-20 pointer-events-none">
+                <div className="max-w-2xl animate-in fade-in slide-in-from-bottom duration-700">
+                   <h3 className="text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">Scene {currentSceneIndex + 1}: {currentScene.title}</h3>
+                   <p className="text-xl md:text-2xl font-semibold leading-snug">{currentScene.description}</p>
+                </div>
+            </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden max-w-5xl mx-auto flex flex-col md:flex-row">
-            {/* Sidebar Mock */}
-            <div className="w-full md:w-64 bg-slate-50 border-r border-slate-200 p-6 space-y-4 hidden md:block">
-              <div className="h-8 bg-slate-200 rounded-md w-3/4 mb-8"></div>
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className={`h-10 rounded-lg flex items-center px-3 ${i === 1 ? 'bg-blue-100 text-blue-600' : 'text-slate-400'}`}>
-                  <div className="w-5 h-5 rounded-full bg-current opacity-20 mr-3"></div>
-                  <div className="h-3 bg-current opacity-20 rounded w-full"></div>
-                </div>
-              ))}
+            {/* HOVER CONTROLS */}
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-6 z-30">
+               <button onClick={handlePrev} className="p-4 bg-white/10 hover:bg-white/20 rounded-full transition-all hover:scale-110">
+                 <RotateCcw className="w-8 h-8 text-white -scale-x-100" />
+               </button>
+               <button onClick={() => setIsPlaying(!isPlaying)} className="p-6 bg-blue-600 rounded-full shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all active:scale-95">
+                 {isPlaying ? <Pause className="w-10 h-10 fill-white" /> : <Play className="w-10 h-10 fill-white translate-x-1" />}
+               </button>
+               <button onClick={handleNext} className="p-4 bg-white/10 hover:bg-white/20 rounded-full transition-all hover:scale-110">
+                 <RotateCcw className="w-8 h-8 text-white" />
+               </button>
             </div>
-            
-            {/* Main Content Mock */}
-            <div className="flex-1 p-8 bg-white min-h-[400px] flex flex-col">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="font-bold text-xl">Technical Interview Simulation</h3>
-                <div className="flex space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
-                  <span className="text-xs font-bold text-slate-400 tracking-widest uppercase">Recording Live</span>
-                </div>
-              </div>
-              
-              <div className="flex-1 flex flex-col justify-center items-center border-2 border-dashed border-slate-100 rounded-2xl relative p-10 bg-slate-50/50">
-                <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl shadow-blue-200 mb-6">
-                  <Play className="fill-current w-8 h-8 translate-x-1" />
-                </div>
-                <p className="text-slate-500 text-center max-w-xs italic font-medium">"Tell me about a time you solved a complex technical problem..."</p>
-                
-                {/* Simulated AI Feedback Bubbles */}
-                <div className="absolute top-4 right-4 bg-white shadow-lg rounded-xl p-3 border border-blue-50 animate-bounce">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span className="text-xs font-bold">Great Eye Contact</span>
-                  </div>
-                </div>
-                
-                <div className="absolute bottom-4 left-4 bg-white shadow-lg rounded-xl p-3 border border-yellow-50">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                    <span className="text-xs font-bold">Try to reduce 'Um/Uh'</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-8 flex justify-center">
-                <div className="flex space-x-8 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-blue-600">88%</div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sentiment Score</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-600">92/100</div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Grammar Points</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        </div>
 
-        {/* Final CTA */}
-        <section className="max-w-4xl mx-auto px-6 py-20 text-center">
-          <div className="bg-gradient-to-br from-secondary to-blue-700 rounded-[3rem] p-12 text-white shadow-2xl shadow-blue-200 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
-            
-            <h2 className="text-4xl font-bold mb-6">Your Success Begins with a Single Word.</h2>
-            <p className="text-xl text-blue-100 mb-10 max-w-xl mx-auto"> Join thousands of students who are mastering the art of communication with VoxVignan.</p>
-            
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <Link href="/auth/signup" className="w-full sm:w-auto bg-white text-secondary px-10 py-4 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg active:scale-95">
-                Start Your Journey Now
-              </Link>
-              <Link href="/auth/login" className="w-full sm:w-auto text-white border border-white/30 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-white/10 transition-colors active:scale-95">
-                Existing Member
-              </Link>
-            </div>
-            
-            <div className="mt-12 flex items-center justify-center space-x-8">
-              <MetricItem icon={<Users />} label="10k+ Users" />
-              <MetricItem icon={<ShieldCheck />} label="Verified AI" />
-              <MetricItem icon={<Award />} label="Certified Growth" />
-            </div>
-          </div>
-        </section>
+        {/* BOTTOM TIMELINE CONTROLS */}
+        <div className="mt-12 flex space-x-4 items-center bg-white/5 p-2 rounded-2xl border border-white/5">
+            {SCENES.map((scene, i) => (
+                <button 
+                  key={scene.id} 
+                  onClick={() => jumpToScene(i)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                    currentSceneIndex === i 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                    : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'
+                  }`}
+                >
+                  {scene.title.split(' ')[0]}
+                </button>
+            ))}
+        </div>
 
       </main>
 
-      <footer className="py-12 border-t border-slate-100 bg-white text-center">
-        <p className="text-slate-400 text-sm">© 2026 VoxVignan AI • Excellence through better communication.</p>
-      </footer>
-    </div>
-  );
-}
-
-function ChallengeItem({ title, description }: { title: string, description: string }) {
-  return (
-    <div className="flex items-start space-x-4 p-4 rounded-2xl hover:bg-white hover:shadow-md transition-all group">
-      <div className="mt-1 w-2 h-2 rounded-full bg-red-400 group-hover:scale-150 transition-transform"></div>
-      <div>
-        <h4 className="font-bold text-slate-800">{title}</h4>
-        <p className="text-slate-500">{description}</p>
+      {/* Guide Footer */}
+      <div className="fixed bottom-0 w-full p-6 text-center text-slate-500 text-sm">
+         <p>Ready to boost your skills? Join 10,000+ students today.</p>
       </div>
     </div>
   );
 }
 
-function SuccessStep({ number, icon, title, description }: { number: string, icon: React.ReactNode, title: string, description: string }) {
-  return (
-    <div className="flex flex-col items-center p-8 rounded-3xl bg-white/5 hover:bg-white/10 transition-colors border border-white/10 group">
-      <div className="text-6xl font-black text-white/5 mb-[-2rem] group-hover:text-blue-400/20 transition-colors">{number}</div>
-      <div className="mb-6 p-4 bg-blue-500/10 rounded-2xl text-blue-400">
-        {icon}
-      </div>
-      <h4 className="text-2xl font-bold mb-4">{title}</h4>
-      <p className="text-blue-100/70 leading-relaxed text-sm">{description}</p>
-    </div>
-  );
+/* --- SCENE COMPONENTS --- */
+
+function IntroScene() {
+    return (
+        <div className="text-center space-y-8 animate-in zoom-in duration-1000">
+            <div className="relative inline-block">
+                <div className="absolute -inset-4 bg-red-500/20 blur-2xl rounded-full"></div>
+                <div className="w-24 h-24 bg-red-500/10 border border-red-500/50 rounded-full flex items-center justify-center relative">
+                    <Mic className="w-10 h-10 text-red-500 animate-pulse" />
+                </div>
+            </div>
+            <h2 className="text-5xl font-black italic tracking-tighter">"I'M NOT PREPARED..."</h2>
+            <div className="flex justify-center space-x-4 opacity-70">
+                <div className="flex items-center space-x-2 px-4 py-2 bg-white/5 rounded-full">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span className="text-sm font-bold">Interview Nervousness</span>
+                </div>
+                <div className="flex items-center space-x-2 px-4 py-2 bg-white/5 rounded-full">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                    <span className="text-sm font-bold">Filler Word Overuse</span>
+                </div>
+            </div>
+        </div>
+    );
 }
 
+function DashboardScene() {
+    return (
+        <div className="w-full h-full flex flex-col space-y-6 pt-4 animate-in fade-in slide-in-from-right duration-1000">
+            {/* Header Mock */}
+            <div className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/5">
+                <div className="h-6 bg-slate-700/50 rounded w-48"></div>
+                <div className="flex space-x-4">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+                        <Flame className="w-4 h-4 text-orange-500" />
+                    </div>
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                        <Trophy className="w-4 h-4 text-blue-500" />
+                    </div>
+                </div>
+            </div>
 
-function MetricItem({ icon, label }: { icon: React.ReactElement, label: string }) {
-  return (
-    <div className="flex items-center space-x-2 text-blue-100">
-      {React.cloneElement(icon, { className: "w-4 h-4" } as any)}
-      <span className="text-xs font-bold tracking-widest uppercase">{label}</span>
-    </div>
-  );
+            {/* Dashboard Cards Mock */}
+            <div className="grid grid-cols-3 gap-6 flex-1">
+                <div className="bg-gradient-to-br from-blue-600/20 to-transparent p-6 rounded-3xl border border-white/5 relative overflow-hidden">
+                    <div className="absolute top-4 right-4 animate-bounce">
+                        <Target className="w-6 h-6 text-blue-500" />
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Weekly Goal</h4>
+                    <div className="text-4xl font-black mb-4">80%</div>
+                    <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500 w-[75%] rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                    </div>
+                </div>
+                
+                <div className="col-span-2 bg-white/5 p-6 rounded-3xl border border-white/5 flex flex-col justify-center">
+                    <div className="flex items-center mb-6">
+                        <Sparkles className="w-5 h-5 text-yellow-400 mr-2" />
+                        <h4 className="font-bold text-lg">7-Day Communication Sprint</h4>
+                    </div>
+                    <div className="flex space-x-3">
+                        {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                            <div key={d} className={`flex-1 aspect-square rounded-xl border flex items-center justify-center font-bold text-xs ${
+                                d < 3 ? 'bg-blue-600/20 border-blue-500/50 text-blue-400' : 'bg-white/5 border-white/10 text-white/20'
+                            }`}>
+                                {d < 3 ? <CheckCircle2 className="w-4 h-4" /> : d}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            
+            {/* Focus Highlight */}
+            <div className="absolute top-[40%] left-[30%] w-32 h-32 border-2 border-red-500 border-dashed rounded-full animate-ping opacity-20 pointer-events-none"></div>
+        </div>
+    );
+}
+
+function ChallengeSelectionScene() {
+    return (
+        <div className="w-full h-full flex flex-col justify-center items-center space-y-8 animate-in zoom-in duration-1000">
+            <h3 className="text-2xl font-bold bg-white/5 px-6 py-2 rounded-full border border-white/10">Active Challenge Selection</h3>
+            
+            <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
+                 <div className="p-6 bg-blue-600 rounded-3xl border border-white/10 shadow-2xl scale-105 relative z-10 transition-transform">
+                    <div className="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
+                        <Mic className="w-6 h-6 text-white" />
+                    </div>
+                    <h4 className="font-bold text-xl mb-1">Elevator Pitch</h4>
+                    <p className="text-sm text-blue-100 opacity-70">Day 3 Objective</p>
+                    <div className="absolute -bottom-2 -right-2 bg-yellow-400 text-black px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">
+                        START NOW
+                    </div>
+                 </div>
+
+                 <div className="p-6 bg-white/5 rounded-3xl border border-white/10 opacity-50 grayscale hover:grayscale-0 transition-all">
+                    <div className="bg-white/10 w-10 h-10 rounded-xl flex items-center justify-center mb-4">
+                        <LayoutDashboard className="w-6 h-6 text-slate-400" />
+                    </div>
+                    <h4 className="font-bold text-xl mb-1">Mock Interview</h4>
+                    <p className="text-sm text-slate-500">Day 4 Objective</p>
+                 </div>
+            </div>
+
+            <div className="flex space-x-12 opacity-40">
+                <div className="flex items-center space-x-2">
+                    <Zap className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Real-time Analysis</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Safe Space</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function AIEvaluationScene() {
+    return (
+        <div className="w-full h-full flex items-center justify-between p-6 animate-in fade-in duration-1000">
+            {/* Left: Video Mock */}
+            <div className="w-1/2 aspect-square bg-[#0d111c] border-2 border-blue-500 rounded-3xl relative overflow-hidden flex items-center justify-center group">
+                <div className="absolute top-4 left-4 flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
+                    <span className="text-[10px] font-bold tracking-widest uppercase">REC</span>
+                </div>
+                
+                {/* Waveform Mock */}
+                <div className="flex items-end space-x-1 h-20">
+                    {[20, 40, 60, 30, 80, 50, 90, 70, 40, 30].map((h, i) => (
+                        <div key={i} className="w-2 bg-blue-500 rounded-full animate-bounce" style={{ height: `${h}%`, animationDelay: `${i * 0.1}s` }}></div>
+                    ))}
+                </div>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent"></div>
+            </div>
+
+            {/* Right: AI Insights Mock */}
+            <div className="w-[45%] space-y-4">
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 animate-in slide-in-from-right duration-700">
+                    <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <h5 className="font-bold text-xs uppercase tracking-widest text-slate-400">Tone Analysis</h5>
+                    </div>
+                    <p className="text-sm font-medium">"Your confidence score is highly positive. Maintain this energy."</p>
+                </div>
+
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 animate-in slide-in-from-right duration-700 delay-200">
+                    <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                        <h5 className="font-bold text-xs uppercase tracking-widest text-slate-400">AI Warning</h5>
+                    </div>
+                    <p className="text-sm border-l-2 border-yellow-500 pl-3">"Slow down. You're speaking at 165 words per minute."</p>
+                </div>
+
+                <div className="bg-blue-600 p-4 rounded-2xl animate-in slide-in-from-right duration-700 delay-500 shadow-xl shadow-blue-500/20">
+                    <div className="flex items-center space-x-2 mb-1">
+                        <BrainCircuit className="w-4 h-4" />
+                        <h5 className="font-black text-[10px] tracking-tighter uppercase">Google Gemini Insights</h5>
+                    </div>
+                    <p className="text-xs font-bold">"Contextual relevance: 9.4/10"</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function SuccessScene() {
+    return (
+        <div className="text-center space-y-10 animate-in zoom-in duration-700">
+            <div className="relative inline-block">
+                <div className="absolute -inset-10 bg-blue-500/30 blur-3xl rounded-full animate-pulse"></div>
+                <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center transform rotate-12 shadow-2xl relative z-10">
+                    <Award className="w-16 h-16 text-white" />
+                </div>
+                <div className="absolute -top-4 -right-4 bg-yellow-400 scale-125 rounded-full p-2 border-4 border-[#141b2d]">
+                    <Sparkles className="w-6 h-6 text-black" />
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <h2 className="text-4xl font-extrabold tracking-tight">Challenge Successful!</h2>
+                <div className="flex justify-center space-x-12 mt-8">
+                    <div>
+                        <div className="text-3xl font-black text-blue-400">+120</div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Comm. Points</div>
+                    </div>
+                    <div className="w-px h-12 bg-white/10"></div>
+                    <div>
+                        <div className="text-3xl font-black text-green-400">Level 4</div>
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Current Rank</div>
+                    </div>
+                </div>
+            </div>
+
+            <button className="bg-white text-black px-12 py-3 rounded-full font-black tracking-widest text-xs hover:scale-105 transition-transform">
+                CLAIM YOUR FREE CERTIFICATE
+            </button>
+        </div>
+    );
 }

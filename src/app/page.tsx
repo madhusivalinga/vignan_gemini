@@ -29,7 +29,7 @@ export default function LandingPage() {
             </Link>
             <Link href="/demo" className="flex items-center space-x-2 bg-white text-secondary border border-secondary px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all shadow-sm">
               <Video className="w-5 h-5" />
-              <span>Watch Demo</span>
+              <span>Start Platform Tour</span>
             </Link>
           </div>
         </section>
