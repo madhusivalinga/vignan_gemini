@@ -11,24 +11,29 @@ import { doc, updateDoc, arrayUnion, increment, getDoc, setDoc } from "firebase/
 export async function saveChallengeProgress(userId: string, day: number, score: number, badge?: string) {
   const userRef = doc(db, "users", userId);
   
+  console.log(`Starting save for Day ${day}, Score: ${score}`);
+  
   try {
     const userDoc = await getDoc(userRef);
-    if (!userDoc.exists()) return;
+    if (!userDoc.exists()) {
+       console.error("User document not found during save.");
+       return;
+    }
 
     const data = userDoc.data();
     const completedDays = data.completedDays || [];
     
-    const updateData: any = {
-      totalScore: increment(score),
-    };
+    const updateData: any = {};
 
-    // Only add to completedDays if not already present
+    // Only add results and increment score if not already completed
     if (!completedDays.includes(day)) {
       updateData.completedDays = arrayUnion(day);
-      
-      // Update streak - this is a simple logic, you might want something more robust
-      // For now, let's just increment it if they finish a new day
+      updateData.totalScore = increment(score);
       updateData.streak = increment(1);
+      
+      console.log(`New Day detected. Incrementing streak and score.`);
+    } else {
+      console.log(`Day ${day} already completed. Skipping score increment.`);
     }
 
     if (badge) {
@@ -36,7 +41,9 @@ export async function saveChallengeProgress(userId: string, day: number, score: 
     }
 
     await updateDoc(userRef, updateData);
+    console.log("Progress saved successfully to Firestore.");
   } catch (error) {
     console.error("Error saving progress:", error);
+    throw error; // Re-throw so the UI can catch it
   }
 }

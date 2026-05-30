@@ -69,6 +69,9 @@ export default function SignupPage() {
           careerInterest: "",
           totalScore: 0,
           badges: [],
+          completedDays: [],
+          streak: 0,
+          monthlyGoal: 80,
           role: "student",
           createdAt: new Date().toISOString()
         });
