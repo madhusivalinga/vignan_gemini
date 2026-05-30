@@ -42,9 +42,18 @@ export default function SignupPage() {
         createdAt: new Date().toISOString()
       });
 
-      router.push("/onboarding");
+      // Redirect to dashboard as a more stable entry point
+      router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to create account");
+      console.error("Signup error:", err);
+      // Firebase specific error messages for better UX
+      if (err.code === 'auth/email-already-in-use') {
+        setError("This email is already registered. Please log in.");
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError("Email/Password signup is not enabled in Firebase Console.");
+      } else {
+        setError(err.message || "Failed to create account");
+      }
       setIsEmailLoading(false);
     }
   };
@@ -75,7 +84,7 @@ export default function SignupPage() {
           role: "student",
           createdAt: new Date().toISOString()
         });
-        router.push("/onboarding");
+        router.push("/dashboard");
       } else {
         router.push("/dashboard");
       }
